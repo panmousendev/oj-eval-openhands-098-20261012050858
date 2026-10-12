@@ -42,6 +42,9 @@ void reverseInorder(TreeNode* root, int k) {
 }
 
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
     vector<int> values(8);
     for (int i = 0; i < 8; i++) {
         cin >> values[i];
