@@ -16,19 +16,27 @@ TreeNode* insertIntoBST(TreeNode* root, int val) {
     }
     if (val < root->val) {
         root->left = insertIntoBST(root->left, val);
-    } else {
+    } else if (val > root->val) {
         root->right = insertIntoBST(root->right, val);
     }
     return root;
 }
 
-vector<int> inorderValues;
+int countNodes(TreeNode* root) {
+    if (root == nullptr) return 0;
+    return 1 + countNodes(root->left) + countNodes(root->right);
+}
 
-void inorderTraversal(TreeNode* root) {
-    if (root == nullptr) return;
-    inorderTraversal(root->left);
-    inorderValues.push_back(root->val);
-    inorderTraversal(root->right);
+TreeNode* findKthLargest(TreeNode* root, int& k) {
+    if (root == nullptr) return nullptr;
+    
+    TreeNode* right = findKthLargest(root->right, k);
+    if (right != nullptr) return right;
+    
+    k--;
+    if (k == 0) return root;
+    
+    return findKthLargest(root->left, k);
 }
 
 int main() {
@@ -48,11 +56,12 @@ int main() {
     
     int k = values[7];
     
-    inorderValues.clear();
-    inorderTraversal(root);
-    
-    if (k >= 1 && k <= inorderValues.size()) {
-        cout << inorderValues[inorderValues.size() - k] << endl;
+    int totalNodes = countNodes(root);
+    if (k >= 1 && k <= totalNodes) {
+        TreeNode* result = findKthLargest(root, k);
+        if (result != nullptr) {
+            cout << result->val << endl;
+        }
     }
     
     return 0;
