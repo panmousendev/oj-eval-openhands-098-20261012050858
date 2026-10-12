@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <queue>
 using namespace std;
 
 struct TreeNode {
@@ -10,33 +10,79 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
-TreeNode* insertIntoBST(TreeNode* root, int val) {
-    if (root == nullptr) {
-        return new TreeNode(val);
+TreeNode* buildBSTFromLevelOrder(const vector<int>& values) {
+    if (values.empty()) return nullptr;
+    
+    TreeNode* root = new TreeNode(values[0]);
+    queue<TreeNode*> q;
+    q.push(root);
+    
+    int index = 1;
+    while (!q.empty() && index < values.size()) {
+        TreeNode* current = q.front();
+        q.pop();
+        
+        if (index < values.size()) {
+            if (values[index] < current->val) {
+                current->left = new TreeNode(values[index]);
+                q.push(current->left);
+            } else {
+                current->right = new TreeNode(values[index]);
+                q.push(current->right);
+            }
+            index++;
+        }
+        
+        if (index < values.size()) {
+            if (values[index] < current->val) {
+                if (current->left == nullptr) {
+                    current->left = new TreeNode(values[index]);
+                    q.push(current->left);
+                } else {
+                    TreeNode* temp = current->left;
+                    while (temp->right != nullptr) {
+                        temp = temp->right;
+                    }
+                    temp->right = new TreeNode(values[index]);
+                    q.push(temp->right);
+                }
+            } else {
+                if (current->right == nullptr) {
+                    current->right = new TreeNode(values[index]);
+                    q.push(current->right);
+                } else {
+                    TreeNode* temp = current->right;
+                    while (temp->left != nullptr) {
+                        temp = temp->left;
+                    }
+                    temp->left = new TreeNode(values[index]);
+                    q.push(temp->left);
+                }
+            }
+            index++;
+        }
     }
-    if (val < root->val) {
-        root->left = insertIntoBST(root->left, val);
-    } else if (val > root->val) {
-        root->right = insertIntoBST(root->right, val);
-    }
+    
     return root;
 }
 
-int countNodes(TreeNode* root) {
-    if (root == nullptr) return 0;
-    return 1 + countNodes(root->left) + countNodes(root->right);
-}
+int count = 0;
+int result = -1;
 
-TreeNode* findKthLargest(TreeNode* root, int& k) {
-    if (root == nullptr) return nullptr;
+void reverseInorder(TreeNode* root, int k) {
+    if (root == nullptr || count >= k) {
+        return;
+    }
     
-    TreeNode* right = findKthLargest(root->right, k);
-    if (right != nullptr) return right;
+    reverseInorder(root->right, k);
     
-    k--;
-    if (k == 0) return root;
+    count++;
+    if (count == k) {
+        result = root->val;
+        return;
+    }
     
-    return findKthLargest(root->left, k);
+    reverseInorder(root->left, k);
 }
 
 int main() {
@@ -48,21 +94,16 @@ int main() {
         cin >> values[i];
     }
     
-    TreeNode* root = nullptr;
-    
-    for (int i = 0; i < 7; i++) {
-        root = insertIntoBST(root, values[i]);
-    }
+    vector<int> bstValues(values.begin(), values.begin() + 7);
+    TreeNode* root = buildBSTFromLevelOrder(bstValues);
     
     int k = values[7];
     
-    int totalNodes = countNodes(root);
-    if (k >= 1 && k <= totalNodes) {
-        TreeNode* result = findKthLargest(root, k);
-        if (result != nullptr) {
-            cout << result->val << endl;
-        }
-    }
+    count = 0;
+    result = -1;
+    reverseInorder(root, k);
+    
+    cout << result << endl;
     
     return 0;
 }
