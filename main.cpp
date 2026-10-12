@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <algorithm>
 using namespace std;
 
@@ -10,16 +11,27 @@ struct TreeNode {
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
-TreeNode* insertIntoBST(TreeNode* root, int val) {
-    if (root == nullptr) {
-        return new TreeNode(val);
+TreeNode* buildBSTFromLevelOrder(const vector<int>& values) {
+    if (values.empty()) return nullptr;
+    
+    vector<TreeNode*> nodes;
+    for (int val : values) {
+        nodes.push_back(new TreeNode(val));
     }
-    if (val < root->val) {
-        root->left = insertIntoBST(root->left, val);
-    } else {
-        root->right = insertIntoBST(root->right, val);
+    
+    for (int i = 0; i < nodes.size(); i++) {
+        int leftIdx = 2 * i + 1;
+        int rightIdx = 2 * i + 2;
+        
+        if (leftIdx < nodes.size()) {
+            nodes[i]->left = nodes[leftIdx];
+        }
+        if (rightIdx < nodes.size()) {
+            nodes[i]->right = nodes[rightIdx];
+        }
     }
-    return root;
+    
+    return nodes[0];
 }
 
 int nodeCount = 0;
@@ -50,11 +62,8 @@ int main() {
         cin >> values[i];
     }
     
-    TreeNode* root = nullptr;
-    
-    for (int i = 0; i < 7; i++) {
-        root = insertIntoBST(root, values[i]);
-    }
+    vector<int> bstValues(values.begin(), values.begin() + 7);
+    TreeNode* root = buildBSTFromLevelOrder(bstValues);
     
     int k = values[7];
     
